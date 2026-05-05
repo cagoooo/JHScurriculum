@@ -507,10 +507,16 @@ footer{background:linear-gradient(140deg,#062e28 0%,#0a4a3e 55%,#0d5e52 100%);co
 .btn-fix-gen:hover{background:#6d28d9}
 .btn-fix-gen:disabled{opacity:.6;cursor:not-allowed}
 .fix-copy-btn{display:inline-block;margin-top:8px;padding:4px 14px;background:#7c3aed;color:#fff;border:none;border-radius:16px;font-size:.78rem;cursor:pointer}
-/* ── HH: Version Toast ───────── */
-.ver-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);opacity:0;background:#1e1b4b;color:#e9d5ff;padding:11px 18px;border-radius:12px;font-size:.85rem;font-weight:700;z-index:9500;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.35);max-width:360px;transition:all .35s cubic-bezier(.4,0,.2,1)}
+/* ── HH: Version Toast (RWD) ───────── */
+/* 國中版說明文字較長 (~105 字),需要更大寬度 + 行距 + 手機直式排版 */
+.ver-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);opacity:0;background:#1e1b4b;color:#e9d5ff;padding:13px 18px;border-radius:12px;font-size:.85rem;line-height:1.55;font-weight:700;z-index:9500;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.35);max-width:520px;width:calc(100vw - 24px);box-sizing:border-box;transition:all .35s cubic-bezier(.4,0,.2,1)}
 .ver-toast.show{transform:translateX(-50%) translateY(0);opacity:1}
-.ver-toast-btn{padding:4px 14px;background:#7c3aed;color:#fff;border:none;border-radius:20px;font-size:.78rem;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap}
+.ver-toast-btn{padding:5px 14px;background:#7c3aed;color:#fff;border:none;border-radius:20px;font-size:.78rem;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap}
+.ver-toast-btn:hover{filter:brightness(1.15)}
+@media(max-width:520px){
+  .ver-toast{flex-direction:column;align-items:stretch;gap:8px;padding:12px 14px;bottom:max(14px,env(safe-area-inset-bottom));font-size:.82rem;line-height:1.6}
+  .ver-toast-btn{align-self:flex-end;padding:7px 18px;font-size:.82rem;min-height:34px}
+}
 /* ── Canva Guide Button ─────── */
 .canva-guide-wrap{margin-top:14px;display:flex;justify-content:center}
 .canva-guide-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 22px;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.45);border-radius:28px;color:#fff;font-size:.88rem;font-weight:700;text-decoration:none;backdrop-filter:blur(6px);transition:all .2s;letter-spacing:.01em}

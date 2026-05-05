@@ -2248,6 +2248,10 @@ function showLastReview(){
   if(!raw)return;
   try{
     const{id,name,time}=JSON.parse(raw);
+    // 國中/國小共用同一個 origin (cagoooo.github.io),localStorage 共用,
+    // 須驗證項次 ID 在當前工具的 REVIEW_DATA 中存在,避免顯示對方的項次
+    const exists=REVIEW_DATA.some(cat=>cat.items.some(it=>it.id===id));
+    if(!exists)return;
     const el=document.getElementById('lastReviewBar');
     el.innerHTML=`&#128336; 上次審查：<strong>${id} ${name}</strong>（${relativeTime(new Date(time))}）`;
     el.classList.remove('hidden');

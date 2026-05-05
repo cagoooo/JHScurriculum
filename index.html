@@ -899,7 +899,7 @@ footer{background:linear-gradient(140deg,#062e28 0%,#0a4a3e 55%,#0d5e52 100%);co
         <span class="footer-logo-icon">&#128203;</span>
         課程計畫 AI 審查工具
       </div>
-      <div class="footer-ver">v1.0.0 · 國中版</div>
+      <div class="footer-ver">v1.0.1 · 國中版</div>
       <p class="footer-desc">依據桃園市教育局 115 學年度國民中學課程計畫審查標準，協助國中教師快速自我審查課程計畫，提升送審品質。</p>
     </div>
     <!-- 快速連結欄 -->
@@ -1276,7 +1276,7 @@ const REVIEW_DATA=[
 2. 若無，可寫本校無，亦可算通過。`},
 {id:'7-3',name:'全校教師授課節數一覽表',prompt:`請審查附加文件，並以表列方式列出本表件不符規定，說明須修正的部分，若正確無誤無須說明，僅出現表件通過即可
 7-3 全校教師授課節數一覽表審查標準
-1. 應授課節數依附件「桃園市國民小學教師每週授課節數實施要點(113.08.27 修訂)」進行審查（依國中端 0505 審查文件指引；如貴校已採國中專屬實施要點，請以實際適用要點為準）
+1. 應授課節數依附件「桃園市國民中學教師授課節數實施要點(114.09.12 修訂)」進行審查
 2. 表頭學年度需為 115`},
 {id:'7-4-1',name:'課程評鑑計畫',prompt:`請審查附加文件，並以表列方式列出本表件不符規定，說明須修正的部分，若正確無誤無須說明，僅出現表件通過即可
 7-4-1 課程評鑑計畫審查標準
@@ -1358,7 +1358,7 @@ const ITEM_DESC={
   '7-1-2-3':'確認有藝術才能班課程發展小組及學校課發會審核通過的會議紀錄，含簽到表。（藝才班適用）',
   '7-1-2-4':'確認有體育班課程規畫小組、體育班發展委員會及學校課發會審核通過的會議紀錄，含簽到表。（體育班適用）',
   '7-2':'若有學生在同一學習階段使用不同版本，需提供版本差異分析及銜接計畫。若無，填「本校無」即算通過。',
-  '7-3':'確認全校教師授課節數一覽表符合桃園市教師每週授課節數實施要點，表頭學年度需為115。⚠️ 國中端 0505 審查文件指引引用的是「國民小學教師每週授課節數實施要點」（疑為原文件未替換為國中版本），如貴校已採國中專屬實施要點，請以實際適用要點為準。',
+  '7-3':'確認全校教師授課節數一覽表符合「桃園市國民中學教師授課節數實施要點(114.09.12 修訂)」，表頭學年度需為 115。',
   '7-4-1':'確認課程評鑑計畫的表頭加入學校名稱，依「桃園市國民中學及國民小學課程評鑑注意事項」辦理。',
   '7-4-2':'確認有至少一份學校課程評鑑檢核表（教科書檢核表可列此）。主要呈現114學年度規劃，無需填寫檢核結果及簽名核章。依「桃園市國民中學及國民小學課程評鑑注意事項」辦理。',
   '7-5':'確認全校學生每日作息時間表符合「桃園市國民中小學學生在校時間實施原則」，表頭學年度需為115。',
@@ -1454,11 +1454,11 @@ const MODELS={
 
 // ===== HH: Version Update Toast =====
 // 國中版獨立版本線:從 v1.0.0-jhs 起算 (程式架構繼承自國小版 v3.10.0)
-const APP_VERSION='v1.0.0-jhs';
+const APP_VERSION='v1.0.1-jhs';
 function showVersionToast(){
   const t=document.createElement('div');
   t.id='verToast';t.className='ver-toast';
-  t.innerHTML=`<span>🎉 國中版審查工具 ${APP_VERSION} 上線！依「ai 審查說明（國中 0505）」全面替換為國中端標準：7-9 年級節數、第四學習階段（Ⅳ）、國中專屬科目（歷史/地理/公民/生物/家政/童軍/輔導/資訊科技/生活科技）</span><button class="ver-toast-btn" onclick="dismissVersionToast()">✓ 知道了</button>`;
+  t.innerHTML=`<span>🎉 國中版 ${APP_VERSION} 更新！7-3 教師授課節數已採用教育局新發布的「桃園市國民中學教師授課節數實施要點 (114.09.12 修訂)」國中專屬版本。</span><button class="ver-toast-btn" onclick="dismissVersionToast()">✓ 知道了</button>`;
   document.body.appendChild(t);
   requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('show')));
   setTimeout(dismissVersionToast,10000);
@@ -3434,7 +3434,7 @@ function downloadWordDoc(){
   const findName=id=>{let n=id;REVIEW_DATA.forEach(cat=>cat.items.forEach(it=>{if(it.id===id)n=it.name;}));return n;};
   const passRows=passItems.map(([id,v])=>`<tr><td>${id}</td><td>${findName(id)}</td><td style="color:#166534">✅ 通過</td><td>${(v.text||'').replace(/\*\*/g,'').replace(/#+\s/g,'').substring(0,120)}...</td></tr>`).join('');
   const failRows=failItems.map(([id,v])=>`<tr><td>${id}</td><td>${findName(id)}</td><td style="color:#991b1b">❌ 待修正</td><td>${(v.text||'').replace(/\*\*/g,'').replace(/#+\s/g,'').substring(0,200)}</td></tr>`).join('');
-  const html=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset="UTF-8"><title>課程計畫審查報告</title><style>body{font-family:'微軟正黑體',Calibri,sans-serif;font-size:12pt;margin:2cm}h1{font-size:18pt;color:#0d5e52;border-bottom:2pt solid #1a8a7a;padding-bottom:6pt}h2{font-size:13pt;color:#1a8a7a;margin-top:16pt}p{margin:6pt 0}table{border-collapse:collapse;width:100%;margin:10pt 0}td,th{border:1pt solid #ccc;padding:6pt 8pt;font-size:11pt;vertical-align:top}th{background:#d0f0eb;font-weight:bold}.sum{padding:10pt;background:#f5f3ff;border:1pt solid #ddd6fe;border-radius:6pt;margin:12pt 0}.footer-note{margin-top:24pt;font-size:9pt;color:#6b7280;border-top:1pt solid #e5e7eb;padding-top:8pt}</style></head><body><h1>📋 國民中學課程計畫 AI 審查報告</h1><p><b>審查時間：</b>${now}</p><p><b>工具版本：</b>課程計畫 AI 審查工具 v1.0.0（國中版）</p><div class="sum"><b>審查摘要：</b> &nbsp; ✅ 通過 ${passItems.length} 項 &nbsp; ❌ 待修正 ${failItems.length} 項${errItems.length?` &nbsp; ⚠️ 錯誤 ${errItems.length} 項`:''} &nbsp; 共 ${vals.length} 項</div><h2>審查結果總覽</h2><table><thead><tr><th>項次</th><th>項目名稱</th><th>審查結果</th><th>說明摘要</th></tr></thead><tbody>${passRows}${failRows}</tbody></table><div class="footer-note">⚠️ 本報告由 AI 自動生成，僅供輔助參考，正式審查結果以教育局委員審定為準。<br>工具連結：https://cagoooo.github.io/JHScurriculum/</div></body></html>`;
+  const html=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset="UTF-8"><title>課程計畫審查報告</title><style>body{font-family:'微軟正黑體',Calibri,sans-serif;font-size:12pt;margin:2cm}h1{font-size:18pt;color:#0d5e52;border-bottom:2pt solid #1a8a7a;padding-bottom:6pt}h2{font-size:13pt;color:#1a8a7a;margin-top:16pt}p{margin:6pt 0}table{border-collapse:collapse;width:100%;margin:10pt 0}td,th{border:1pt solid #ccc;padding:6pt 8pt;font-size:11pt;vertical-align:top}th{background:#d0f0eb;font-weight:bold}.sum{padding:10pt;background:#f5f3ff;border:1pt solid #ddd6fe;border-radius:6pt;margin:12pt 0}.footer-note{margin-top:24pt;font-size:9pt;color:#6b7280;border-top:1pt solid #e5e7eb;padding-top:8pt}</style></head><body><h1>📋 國民中學課程計畫 AI 審查報告</h1><p><b>審查時間：</b>${now}</p><p><b>工具版本：</b>課程計畫 AI 審查工具 v1.0.1（國中版）</p><div class="sum"><b>審查摘要：</b> &nbsp; ✅ 通過 ${passItems.length} 項 &nbsp; ❌ 待修正 ${failItems.length} 項${errItems.length?` &nbsp; ⚠️ 錯誤 ${errItems.length} 項`:''} &nbsp; 共 ${vals.length} 項</div><h2>審查結果總覽</h2><table><thead><tr><th>項次</th><th>項目名稱</th><th>審查結果</th><th>說明摘要</th></tr></thead><tbody>${passRows}${failRows}</tbody></table><div class="footer-note">⚠️ 本報告由 AI 自動生成，僅供輔助參考，正式審查結果以教育局委員審定為準。<br>工具連結：https://cagoooo.github.io/JHScurriculum/</div></body></html>`;
   const blob=new Blob(['\ufeff'+html],{type:'application/msword;charset=utf-8'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);

@@ -1,8 +1,9 @@
 """
 Generate favicon.png / favicon.ico / og-image.png for the JHS curriculum review tool.
-Uses an indigo/blue palette to visually distinguish the 國中 build from the
-國小 (teal/green) build, and the document badge shows "中" (中學) instead of
-the elementary version's checkmark-only motif.
+Uses a CHALKBOARD palette (dark teal-green + chalk white + amber/yellow accents)
+to match the visual identity of the NotebookLM-generated Canva teaching deck.
+The document badge shows "中" (中學) drawn in chalky strokes — visually distinct
+from the elementary 國小 build (which uses a teal/green ✓ checkmark on white card).
 
 Run: python generate_assets.py
 """
@@ -16,15 +17,18 @@ from PIL import Image, ImageDraw, ImageFont
 FONT_REGULAR = "C:/Windows/Fonts/msjh.ttc"
 FONT_BOLD    = "C:/Windows/Fonts/msjhbd.ttc"
 
-# ─── Colors (Indigo / Blue palette for JHS) ───────────────
-C_DARK    = (30,  41, 100)   # #1e2964 deep indigo
-C_MID     = (49,  68, 168)   # #3144a8 indigo
-C_LIGHT   = (96, 118, 220)   # #6076dc lighter indigo
-C_ACCENT  = (245, 158,  11)  # #f59e0b amber (instead of green for JHS)
-C_AMBER_D = (217, 119,   6)  # #d97706 amber dark
-C_WHITE   = (255, 255, 255)
-C_PALE    = (224, 230, 255)  # very pale indigo
-C_INK     = ( 30,  27,  75)  # text ink
+# ─── Colors (CHALKBOARD palette — matches Canva teaching deck) ──
+C_BOARD    = ( 38,  60,  56)   # #263c38 dark chalkboard (deep teal-green)
+C_BOARD_D  = ( 22,  38,  36)   # #162624 darker chalkboard for shadows
+C_BOARD_L  = ( 56,  82,  76)   # #38524c lighter teal-green for soft regions
+C_CHALK    = (245, 245, 240)   # #f5f5f0 off-white chalk (slightly warm,less harsh than pure white)
+C_CHALK_D  = (200, 205, 195)   # #c8cdc3 dimmed chalk for secondary text
+C_AMBER    = (255, 193,   7)   # #ffc107 yellow chalk (highlight)
+C_ORANGE   = (255, 152,   0)   # #ff9800 orange chalk (badge / accent)
+C_ORANGE_D = (230, 119,   0)   # #e67700 dark orange (badge stroke)
+C_PINK     = (244, 114, 182)   # #f472b6 pink chalk (secondary accent)
+C_BLUE     = (100, 181, 246)   # #64b5f6 blue chalk (links/info)
+C_WHITE    = (255, 255, 255)
 
 
 def font(path, size):
@@ -35,52 +39,65 @@ def font(path, size):
 # 1. FAVICON  (256×256 → saved as PNG; also exported as ICO)
 # ════════════════════════════════════════════════════════════
 def make_favicon():
+    """
+    Chalkboard-style favicon: dark teal-green board + chalky doc lines +
+    amber/orange '中' badge. Matches Canva teaching deck visual identity.
+    """
     SIZE = 256
     img = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
 
-    # Rounded square background — solid indigo (matches 國小 version's saturation)
-    # 不做 gradient overlay,避免把底色洗淡;靠純色塊與綠色國小版做對比
+    # Chalkboard background: rounded square in dark teal-green
     margin = 8
     r = 52
     d.rounded_rectangle([margin, margin, SIZE-margin, SIZE-margin],
-                        radius=r, fill=C_DARK)  # 用 C_DARK (深靛) 而非 C_MID,對比更明顯
+                        radius=r, fill=C_BOARD)
 
-    # Document body (white card)
-    doc_x, doc_y = 62, 48
+    # Subtle wooden-frame inner border (slightly lighter chalkboard tone)
+    d.rounded_rectangle([margin+6, margin+6, SIZE-margin-6, SIZE-margin-6],
+                        radius=r-6, outline=C_BOARD_L, width=2)
+
+    # Document body — chalky off-white card (translucent feel)
+    doc_x, doc_y = 56, 44
     doc_w, doc_h = 148, 190
     d.rounded_rectangle([doc_x, doc_y, doc_x+doc_w, doc_y+doc_h],
-                        radius=10, fill=C_WHITE)
+                        radius=8, fill=C_CHALK)
 
-    # Folded corner
-    fold = 28
+    # Folded corner — dimmer chalk tone
+    fold = 26
     d.polygon([
         (doc_x+doc_w-fold, doc_y),
         (doc_x+doc_w, doc_y+fold),
         (doc_x+doc_w-fold, doc_y+fold),
-    ], fill=C_PALE)
+    ], fill=C_CHALK_D)
 
-    # Text lines on document
-    line_color = C_LIGHT
-    lx = doc_x + 18
-    for i, width_pct in enumerate([0.72, 0.55, 0.68, 0.45]):
-        ly = doc_y + 55 + i * 28
-        lw = int(doc_w * 0.75 * width_pct)
-        d.rounded_rectangle([lx, ly, lx+lw, ly+10], radius=5, fill=line_color)
+    # "Chalk lines" on document — alternating colored chalk widths
+    line_styles = [
+        (0.78, C_BOARD),    # main heading line (board color)
+        (0.55, C_BOARD_L),  # paragraph
+        (0.68, C_BOARD_L),
+        (0.42, C_AMBER),    # highlighted bullet (yellow chalk)
+        (0.58, C_BOARD_L),
+    ]
+    lx = doc_x + 16
+    for i, (width_pct, col) in enumerate(line_styles):
+        ly = doc_y + 32 + i * 26
+        lw = int(doc_w * 0.78 * width_pct)
+        d.rounded_rectangle([lx, ly, lx+lw, ly+9], radius=4, fill=col)
 
-    # JHS-distinct badge: amber circle with "中" character (junior-high marker)
-    badge_cx, badge_cy, badge_r = SIZE - 68, SIZE - 68, 46
-    # Amber base
+    # Orange "中" badge — bottom right corner, like a chalk-circled stamp
+    badge_cx, badge_cy, badge_r = SIZE - 64, SIZE - 64, 48
+    # Outer chalk-circle stroke (slightly rough feel via 2-tone)
     d.ellipse([badge_cx-badge_r, badge_cy-badge_r,
-               badge_cx+badge_r, badge_cy+badge_r], fill=C_ACCENT)
-    # Inner ring for depth
+               badge_cx+badge_r, badge_cy+badge_r], fill=C_ORANGE)
+    # Inner ring for chalk-stroke depth
     d.ellipse([badge_cx-badge_r+5, badge_cy-badge_r+5,
                badge_cx+badge_r-5, badge_cy+badge_r-5],
-              outline=C_AMBER_D, width=3)
-    # "中" character — bold white, centered
-    f_zhong = font(FONT_BOLD, 56)
+              outline=C_ORANGE_D, width=3)
+    # "中" — bold chalky white, centered
+    f_zhong = font(FONT_BOLD, 60)
     d.text((badge_cx, badge_cy + 2), "中",
-           font=f_zhong, fill=C_WHITE, anchor="mm")
+           font=f_zhong, fill=C_CHALK, anchor="mm")
 
     img.save("favicon.png")
 
@@ -90,7 +107,7 @@ def make_favicon():
     icons[0].save("favicon.ico", format="ICO",
                   append_images=icons[1:],
                   sizes=ico_sizes)
-    print("✅ favicon.png + favicon.ico saved (JHS indigo + 中 badge)")
+    print("✅ favicon.png + favicon.ico saved (chalkboard + orange 中 badge)")
 
 
 # ════════════════════════════════════════════════════════════
@@ -106,152 +123,173 @@ def _composite(base_rgba, overlay_rgba):
 
 
 def make_og():
+    """
+    Chalkboard-style OG image (1200×630): dark teal-green board background,
+    white chalk title, amber/orange highlight strokes, hand-drawn feel.
+    Matches the Canva teaching deck so social previews look consistent.
+    """
     W, H = 1200, 630
-    # Use full RGBA pipeline so translucent pills/chips render correctly
-    img = Image.new("RGBA", (W, H), (*C_DARK, 255))
+    img = Image.new("RGBA", (W, H), (*C_BOARD, 255))
     d = ImageDraw.Draw(img)
 
-    # ── Indigo gradient background (diagonal) ──────────────
-    for x in range(W):
-        t = x / W
-        color = lerp_color(C_DARK, C_MID, t * 0.65)
-        d.line([(x, 0), (x, H)], fill=(*color, 255))
+    # ── Subtle vertical gradient on the board (top brighter, bottom darker) ──
+    for y in range(H):
+        t = y / H
+        color = lerp_color(C_BOARD_L, C_BOARD_D, t * 0.7 + 0.15)
+        d.line([(0, y), (W, y)], fill=(*color, 255))
 
-    # ── Decorative circles (cooler indigo glow) ────────────
-    for cx, cy, cr, alpha in [
-        (1050, 160, 240, 22),
-        (1050, 160, 170, 30),
-        (120,  530,  90, 18),
-        (1100, 540,  55, 24),
-        ( 880,  60,  70, 16),
-    ]:
-        overlay = Image.new("RGBA", (W, H), (0,0,0,0))
-        od = ImageDraw.Draw(overlay)
-        od.ellipse([cx-cr, cy-cr, cx+cr, cy+cr],
-                   fill=(*C_LIGHT, alpha))
-        img = _composite(img, overlay)
+    # ── Add a faint "chalk dust" texture via random soft circles ──
+    import random
+    random.seed(42)  # deterministic
+    dust = Image.new("RGBA", (W, H), (0,0,0,0))
+    dod = ImageDraw.Draw(dust)
+    for _ in range(120):
+        x = random.randint(0, W); y = random.randint(0, H)
+        r = random.randint(1, 3)
+        a = random.randint(8, 28)
+        dod.ellipse([x-r, y-r, x+r, y+r], fill=(*C_CHALK, a))
+    img = _composite(img, dust)
     d = ImageDraw.Draw(img)
 
-    # ── Document card (right side) ─────────────────────────
-    card_x, card_y, card_w, card_h = 820, 140, 270, 340
-    # shadow (multiple layered translucent rects for soft edge)
-    shadow = Image.new("RGBA", (W, H), (0,0,0,0))
-    sd = ImageDraw.Draw(shadow)
-    for s in range(12, 0, -1):
-        sd.rounded_rectangle(
-            [card_x+s, card_y+s, card_x+card_w+s, card_y+card_h+s],
-            radius=16, fill=(0,0,0, 10))
-    img = _composite(img, shadow)
-    d = ImageDraw.Draw(img)
+    # ── Chalk frame (slight rectangle "drawn" border) ──
+    frame_inset = 18
+    for offset in [0, 2, -1]:  # multi-pass for hand-drawn feel
+        d.rectangle([frame_inset+offset, frame_inset+offset,
+                     W-frame_inset-offset, H-frame_inset-offset],
+                    outline=(*C_CHALK_D, 180), width=1)
 
-    # card body
-    d.rounded_rectangle([card_x, card_y, card_x+card_w, card_y+card_h],
-                        radius=16, fill=(255,255,255,255))
-
-    # card header bar (indigo)
-    d.rounded_rectangle([card_x, card_y, card_x+card_w, card_y+52],
-                        radius=16, fill=(*C_MID,255))
-    d.rectangle([card_x, card_y+36, card_x+card_w, card_y+52], fill=(*C_MID,255))
-
-    # header text
-    fsmall = font(FONT_BOLD, 20)
-    d.text((card_x+card_w//2, card_y+26), "國中課程計畫審查",
-           font=fsmall, fill=(*C_WHITE,255), anchor="mm")
-
-    # document lines
-    lx = card_x + 22
-    for i, (w_pct, _) in enumerate([
-        (0.78, 200),(0.60, 170),(0.70, 160),
-        (0.50, 140),(0.65, 130),(0.45, 110),
-    ]):
-        ly = card_y + 80 + i * 32
-        lw = int(card_w * 0.82 * w_pct)
-        gray = int(220 - (1-w_pct)*60)
-        d.rounded_rectangle([lx, ly, lx+lw, ly+12],
-                            radius=6, fill=(gray, gray, gray, 255))
-
-    # "中" badge on card (replaces green checkmark — visually identifies JHS)
-    bx, by, br = card_x+card_w-50, card_y+card_h-50, 38
-    d.ellipse([bx-br, by-br, bx+br, by+br], fill=(*C_ACCENT,255))
-    d.ellipse([bx-br+3, by-br+3, bx+br-3, by+br-3],
-              outline=(*C_AMBER_D,255), width=2)
-    d.text((bx, by+1), "中", font=font(FONT_BOLD, 42),
-           fill=(*C_WHITE,255), anchor="mm")
-
-    # AI label badge on card (indigo accent)
-    d.rounded_rectangle([card_x+16, card_y+card_h-76,
-                         card_x+90, card_y+card_h-52],
-                        radius=10, fill=(*C_LIGHT,255))
-    d.text((card_x+53, card_y+card_h-64), "AI 審查",
-           font=font(FONT_BOLD, 16), fill=(*C_WHITE,255), anchor="mm")
-
-    # ── Left-side text ─────────────────────────────────────
-    # Badge pill: 桃園市115學年度 · 國民中學
-    # Composite onto RGBA so alpha actually shows through
+    # ── Top-left chalk-pill badge ──
     pill_overlay = Image.new("RGBA", (W, H), (0,0,0,0))
     pod = ImageDraw.Draw(pill_overlay)
-    pill_w, pill_h = 330, 40
+    pill_w, pill_h = 360, 44
     pill_x, pill_y = 72, 70
     pod.rounded_rectangle([pill_x, pill_y, pill_x+pill_w, pill_y+pill_h],
-                          radius=20, fill=(255,255,255,55))
+                          radius=22, fill=(*C_BOARD_D, 220))
     pod.rounded_rectangle([pill_x, pill_y, pill_x+pill_w, pill_y+pill_h],
-                          radius=20, outline=(255,255,255,150), width=2)
+                          radius=22, outline=(*C_AMBER, 255), width=2)
     img = _composite(img, pill_overlay)
     d = ImageDraw.Draw(img)
     d.text((pill_x+pill_w//2, pill_y+pill_h//2),
            "桃園市 115 學年度 · 國民中學",
-           font=font(FONT_BOLD, 18), fill=(*C_WHITE,255), anchor="mm")
+           font=font(FONT_BOLD, 20), fill=(*C_AMBER, 255), anchor="mm")
 
-    # Main title
-    d.text((72, 175), "課程計畫",
-           font=font(FONT_BOLD, 100), fill=(*C_WHITE,255))
-    d.text((72, 280), "AI 審查工具",
-           font=font(FONT_BOLD, 100), fill=(*C_WHITE,255))
+    # ── Main chalk title (large white) ──
+    d.text((72, 165), "課程計畫",
+           font=font(FONT_BOLD, 102), fill=(*C_CHALK, 255))
+    d.text((72, 275), "AI 審查工具",
+           font=font(FONT_BOLD, 102), fill=(*C_CHALK, 255))
 
-    # Amber accent line (replaces 國小's green line)
-    d.rounded_rectangle([72, 393, 620, 399], radius=3, fill=(*C_ACCENT,255))
+    # Yellow chalk underline strokes (3 hand-drawn passes for organic feel)
+    underline_overlay = Image.new("RGBA", (W, H), (0,0,0,0))
+    uo = ImageDraw.Draw(underline_overlay)
+    for off in [(0, 0, 5), (1, 1, 4), (-1, -1, 3)]:
+        dx, dy, w = off
+        uo.line([(72+dx, 392+dy), (640+dx, 388+dy)],
+                fill=(*C_AMBER, 230), width=w)
+    img = _composite(img, underline_overlay)
+    d = ImageDraw.Draw(img)
 
-    # Subtitle (JHS-specific wording: 七至九年級)
-    d.text((72, 416),
+    # ── Subtitle (chalky white, slightly dimmer) ──
+    d.text((72, 412),
            "上傳 7-9 年級課程計畫 PDF，依國中審查標準自動審查各項次",
-           font=font(FONT_REGULAR, 22), fill=(*C_WHITE,255))
+           font=font(FONT_REGULAR, 22), fill=(*C_CHALK_D, 255))
 
-    # Feature chips (JHS-specific) — composite alpha pills, then draw text
+    # ── Feature chips (chalk-circled labels) ──
+    chips = ["40+ 國中審查項次", "第四學習階段 Ⅳ", "Gemini AI 驅動", "可彈性編輯提示詞"]
+    chip_colors = [C_AMBER, C_ORANGE, C_BLUE, C_PINK]
+    fw = font(FONT_BOLD, 18)
     chip_overlay = Image.new("RGBA", (W, H), (0,0,0,0))
     cod = ImageDraw.Draw(chip_overlay)
-    # NOTE: 不放 emoji,因 msjh.ttc 不含 emoji 字型會變成方框 (tofu)
-    chips = ["40+ 國中審查項次", "第四學習階段 Ⅳ", "Gemini AI 驅動", "可彈性編輯提示詞"]
-    fw = font(FONT_BOLD, 18)
-    chip_positions = []  # store (cx, pw) for the text pass
+    chip_positions = []
     cx = 72
-    for chip in chips:
+    for chip, col in zip(chips, chip_colors):
         tw = d.textlength(chip, font=fw)
-        pw = int(tw) + 36
-        cod.rounded_rectangle([cx, 470, cx+pw, 514], radius=22,
-                              fill=(255,255,255,55))
-        cod.rounded_rectangle([cx, 470, cx+pw, 514], radius=22,
-                              outline=(255,255,255,150), width=2)
-        chip_positions.append((cx, pw, chip))
+        pw = int(tw) + 32
+        # Filled board-dark base + colored chalk border
+        cod.rounded_rectangle([cx, 472, cx+pw, 514], radius=21,
+                              fill=(*C_BOARD_D, 230))
+        cod.rounded_rectangle([cx, 472, cx+pw, 514], radius=21,
+                              outline=(*col, 255), width=2)
+        chip_positions.append((cx, pw, chip, col))
         cx += pw + 14
     img = _composite(img, chip_overlay)
     d = ImageDraw.Draw(img)
-    for cx, pw, chip in chip_positions:
-        d.text((cx+pw//2, 492), chip, font=fw,
-               fill=(*C_WHITE,255), anchor="mm")
+    for cx, pw, chip, col in chip_positions:
+        d.text((cx+pw//2, 493), chip, font=fw, fill=(*col, 255), anchor="mm")
 
-    # URL bottom left
+    # ── Right-side: chalk-drawn "doc with 中 badge" illustration ──
+    # Chalk doc outline (no fill, just chalk strokes)
+    doc_x, doc_y, doc_w, doc_h = 850, 130, 250, 320
+    # Chalky paper card - off-white fill
+    d.rounded_rectangle([doc_x, doc_y, doc_x+doc_w, doc_y+doc_h],
+                        radius=14, fill=(*C_CHALK, 240))
+    # Folded corner
+    fold = 30
+    d.polygon([
+        (doc_x+doc_w-fold, doc_y),
+        (doc_x+doc_w, doc_y+fold),
+        (doc_x+doc_w-fold, doc_y+fold),
+    ], fill=(*C_CHALK_D, 240))
+
+    # Doc title bar (board green)
+    d.rounded_rectangle([doc_x, doc_y, doc_x+doc_w, doc_y+50],
+                        radius=14, fill=(*C_BOARD, 255))
+    d.rectangle([doc_x, doc_y+34, doc_x+doc_w, doc_y+50], fill=(*C_BOARD, 255))
+    d.text((doc_x+doc_w//2, doc_y+25), "國中課程計畫審查",
+           font=font(FONT_BOLD, 19), fill=(*C_AMBER, 255), anchor="mm")
+
+    # Doc content lines (mixed colors like chalk highlights)
+    line_styles = [
+        (0.78, C_BOARD),
+        (0.62, C_BOARD_L),
+        (0.70, C_BOARD_L),
+        (0.45, C_ORANGE),  # highlighted
+        (0.66, C_BOARD_L),
+        (0.50, C_BOARD_L),
+    ]
+    lx = doc_x + 22
+    for i, (w_pct, col) in enumerate(line_styles):
+        ly = doc_y + 80 + i * 32
+        lw = int(doc_w * 0.82 * w_pct)
+        d.rounded_rectangle([lx, ly, lx+lw, ly+11], radius=5, fill=(*col, 255))
+
+    # AI 審查 sub-badge (left of card)
+    d.rounded_rectangle([doc_x+18, doc_y+doc_h-72,
+                         doc_x+92, doc_y+doc_h-46],
+                        radius=11, fill=(*C_BLUE, 255))
+    d.text((doc_x+55, doc_y+doc_h-59), "AI 審查",
+           font=font(FONT_BOLD, 16), fill=(*C_WHITE, 255), anchor="mm")
+
+    # Orange "中" badge — chalky stamp in bottom-right of card
+    bx, by, br = doc_x+doc_w-44, doc_y+doc_h-44, 36
+    d.ellipse([bx-br, by-br, bx+br, by+br], fill=(*C_ORANGE, 255))
+    d.ellipse([bx-br+3, by-br+3, bx+br-3, by+br-3],
+              outline=(*C_ORANGE_D, 255), width=2)
+    d.text((bx, by+1), "中", font=font(FONT_BOLD, 40),
+           fill=(*C_CHALK, 255), anchor="mm")
+
+    # Hand-drawn arrow + sparkle around the doc (chalk decoration)
+    sparkle_overlay = Image.new("RGBA", (W, H), (0,0,0,0))
+    so = ImageDraw.Draw(sparkle_overlay)
+    # Sparkle stars (★) above doc
+    for x, y, sz in [(820, 145, 16), (1110, 280, 14), (810, 380, 12)]:
+        # 4-point sparkle drawn as 2 thin rectangles
+        so.line([(x-sz, y), (x+sz, y)], fill=(*C_AMBER, 220), width=3)
+        so.line([(x, y-sz), (x, y+sz)], fill=(*C_AMBER, 220), width=3)
+    img = _composite(img, sparkle_overlay)
+    d = ImageDraw.Draw(img)
+
+    # ── Bottom: URL (left) + credit (right) ──
     d.text((72, 578), "cagoooo.github.io/JHScurriculum",
-           font=font(FONT_REGULAR, 20), fill=(*C_WHITE,255))
-
-    # Credit bottom right
+           font=font(FONT_REGULAR, 20), fill=(*C_CHALK_D, 255))
     d.text((W-60, 578), "阿凱老師製作",
-           font=font(FONT_REGULAR, 20), fill=(*C_WHITE,255), anchor="ra")
+           font=font(FONT_REGULAR, 20), fill=(*C_CHALK_D, 255), anchor="ra")
 
-    # Flatten to RGB for OG image (PNG with alpha works on FB/LINE but RGB is safer)
-    final = Image.new("RGB", (W, H), C_DARK)
+    # Flatten to RGB
+    final = Image.new("RGB", (W, H), C_BOARD)
     final.paste(img, (0, 0), img)
     final.save("og-image.png", format="PNG", optimize=True)
-    print("✅ og-image.png saved (1200×630, JHS indigo theme, properly composited)")
+    print("✅ og-image.png saved (1200×630, chalkboard theme matching Canva deck)")
 
 
 # ════════════════════════════════════════════════════════════

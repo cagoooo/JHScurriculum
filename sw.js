@@ -1,6 +1,6 @@
-// Service Worker for 國中課程計畫AI審查工具 v1.1.0-jhs
-const SW_VERSION = 'v1.1.0-jhs';
-const CACHE_NAME = 'jhs-curriculum-v1.1.0';
+// Service Worker for 國中課程計畫AI審查工具 v1.2.0-jhs
+const SW_VERSION = 'v1.2.0-jhs';
+const CACHE_NAME = 'jhs-curriculum-v1.2.0';
 const CACHE_URLS = [
   '/JHScurriculum/',
   '/JHScurriculum/index.html',

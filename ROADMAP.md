@@ -1,11 +1,33 @@
 # 國中課程計畫 AI 審查工具 — 開發進度與未來規劃
 
-> 最後更新：2026-05-20　｜　作者：阿凱老師　｜　目前版本：**v1.3.0-jhs**
+> 最後更新：2026-05-22　｜　作者：阿凱老師　｜　目前版本：**v1.3.2-jhs**
 > 國中版獨立計版（v1.0.0 起算）；底層程式架構繼承自[國小版](https://github.com/cagoooo/curriculum) v3.10.0。
 
 ---
 
 ## 一、版本歷程
+
+### v1.3.2-jhs（2026-05-22）— 💸 LINE 通知瘦身（與國小端 v4.2.2 同步）
+
+拿掉「使用者送出」狀態通知，只保留「完成 / 失敗」兩狀態 Flex 卡片，避免吃光 LINE 官方訊息額度。每次操作（審查或產生）LINE 訊息量從 2 則降到 1 則，**省 50% 配額**。
+
+| 階段 | 變更 |
+|---|---|
+| started ❌ | 兩處呼叫都拔掉（`executeReview()` + `genGenerate()`） |
+| success ✅ | 保留 |
+| failed ❌ | 保留 |
+
+#### 動到的檔
+- `index.html`：拔掉兩個 `notifyAdmin('started', ...)`、bump APP_VERSION、更新 toast 文案
+- `sw.js`：SW_VERSION 升 `v1.3.2-jhs`、CACHE_NAME 升 `jhs-curriculum-v1.3.2`
+
+---
+
+### v1.3.1-jhs hotfix（2026-05-21）— 🩹 `.gen-loader` `hidden` 屬性失效
+
+修 CSS class 蓋掉 `hidden` 屬性導致進入 G3 立刻轉圈圈的顯示 bug。與國小端 v4.2.1 同步。
+
+---
 
 ### v1.3.0-jhs（2026-05-20）— 💬 產生器接 LINE 即時通知（與國小端 v4.2.0 同步）
 

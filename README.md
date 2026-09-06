@@ -2,6 +2,8 @@
 
 > 依據桃園市教育局115學年度國中審查標準（0505版審查文件），上傳課程計畫 PDF 即可透過 AI 自動審查 | 阿凱老師製作
 
+> 📌 **目前版本：v1.3.2**（依據 程式內版本常數）
+
 🔗 **線上使用：** [https://cagoooo.github.io/JHScurriculum/](https://cagoooo.github.io/JHScurriculum/)
 🏫 **國小版（1-6 年級）：** [https://cagoooo.github.io/curriculum/](https://cagoooo.github.io/curriculum/)
 

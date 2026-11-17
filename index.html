@@ -2310,11 +2310,11 @@ const MODELS={
 
 // ===== HH: Version Update Toast =====
 // 國中版獨立版本線:從 v1.0.0-jhs 起算 (程式架構繼承自國小版 v3.10.0)
-const APP_VERSION='v1.3.2-jhs';
+const APP_VERSION='v1.3.3-jhs';
 function showVersionToast(){
   const t=document.createElement('div');
   t.id='verToast';t.className='ver-toast';
-  t.innerHTML=`<span>✨ 國中版 ${APP_VERSION} 更新！LINE 即時通知改為「<b>只發完成 / 失敗</b>」兩狀態（拿掉送出通知），避免吃光 LINE 官方訊息額度，與國小端 v4.2.2 同步。</span><button class="ver-toast-btn" onclick="dismissVersionToast()">✓ 知道了</button>`;
+  t.innerHTML=`<span>✨ 國中版 ${APP_VERSION} 更新！頁尾署名改連阿凱老師教育科技創新專區。</span><button class="ver-toast-btn" onclick="dismissVersionToast()">✓ 知道了</button>`;
   document.body.appendChild(t);
   requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('show')));
   setTimeout(dismissVersionToast,10000);

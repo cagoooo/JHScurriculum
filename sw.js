@@ -1,6 +1,8 @@
-// Service Worker for 國中課程計畫AI審查工具 v1.3.3-jhs
-const SW_VERSION = 'v1.3.3-jhs';
-const CACHE_NAME = 'jhs-curriculum-v1.3.3';
+// Service Worker for 國中課程計畫AI審查工具 v1.3.4-jhs
+const SW_VERSION = 'v1.3.4-jhs';
+// 同一網域（cagoooo.github.io）的所有工具共用快取空間，只能清除自己這個前綴的快取
+const CACHE_PREFIX = 'jhs-curriculum-';
+const CACHE_NAME = CACHE_PREFIX + 'v1.3.4';
 const CACHE_URLS = [
   '/JHScurriculum/',
   '/JHScurriculum/index.html',
@@ -24,7 +26,7 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+        keys.filter(k => k.startsWith(CACHE_PREFIX) && k !== CACHE_NAME).map(k => caches.delete(k))
       ))
       .then(() => self.clients.claim())
       .then(() => {
